@@ -1,5 +1,5 @@
-"""Top-level package for camp_assembled-virus-characterization."""
+"""Top-level package for the CAMP Virus-Phage Detect module."""
 
-__author__ = Braden Tierney
-__email__ = braden.tierney@gmail.com
+__author__ = y
+__email__ = y
 __version__ = 0.1.0
