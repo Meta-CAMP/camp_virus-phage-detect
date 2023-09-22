@@ -120,7 +120,7 @@ rule vibrant:
 	log:                                 
 		join(dirs.LOG, '1.2_vibrant', '{sample}.out'),
 	conda:
-		join(config['env_yamls'], 'new_vibrant.yaml'),
+		join(config['env_yamls'], 'vibrant.yaml'),
 	threads: config['vibrant_rule_threads'],
 	params:
 		vibrant_script  = join(dirs_scr, 'VIBRANT_run.py'),
@@ -156,7 +156,11 @@ rule virsorter:
 		min_length = config['virsorter_min_contig_length'],
 	shell:
 		"""
-		virsorter run -w {params.out_dir} -d /root/db -i {input.ctg} --min-length {params.min_length} -j {threads}
+		# setup database in case it doesn't exist!
+		db_path="$(echo "$(which virsorter)" | rev |  cut -c 10- | rev )"
+		if [ ! -d "$db_path" ]; then virsorter setup -d "$db_path" -j 4; else :; fi
+
+		virsorter run -w {params.out_dir} -d "$db_path" -i {input.ctg} --min-length {params.min_length} -j {threads}
 		#cp {params.out_dir}/final-viral-combined.fa {params.out_dir}/virsorter_detected_viruses.fasta
 		cat {params.out_dir}/final-viral-combined.fa | grep ">" | sed "s/_fragment_1//g;s/>//g" | cut -f1 -d "|" > {params.out_dir}/virsorter_detected_viruses.txt	
 	
