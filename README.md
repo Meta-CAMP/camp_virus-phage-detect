@@ -1,43 +1,59 @@
-# CAMP Virus-Phage Detect
+# CAMP viral_investigation
 
 
-[![Documentation Status](https://img.shields.io/readthedocs/camp_virus-phage-detect)](https://camp-documentation.readthedocs.io/en/latest/virus-phage-detect.html)
+[![Documentation Status](https://img.shields.io/readthedocs/camp_viral_investigation)](https://camp-documentation.readthedocs.io/en/latest/viral_investigation.html)
 
 ![Version](https://img.shields.io/badge/version-0.1.0-brightgreen)
 
 ## Overview
 
-This module is designed to function as both a standalone MAG Virus-Phage Detect pipeline as well as a component of the larger CAMP metagenomics analysis pipeline. As such, it is both self-contained (ex. instructions included for the setup of a versioned environment, etc.), and seamlessly compatible with other CAMP modules (ex. ingests and spawns standardized input/output config files, etc.). 
+This module is designed to function as both a standalone viral investigation pipeline as well as a component of the larger CAMP metagenomics analysis pipeline. As such, it is both self-contained (ex. instructions included for the setup of a versioned environment, etc.), and seamlessly compatible with other CAMP modules (ex. ingests and spawns standardized input/output config files, etc.). 
 
-The CAMP virus/phage detection workflow integrates several metaviral detection tools.
-<!--- 
-Add longer description of your workflow's algorithmic contents 
---->
+The CAMP Viral Investigation module identifies and characterizes viral genomic units in metagenomic data. 
+
+
+## Test Dataset 
+The test dataset was simulated using [ART](https://www.niehs.nih.gov/research/resources/software/biostatistics/art/index.cfm) with the following parameters:
+- read length (-l): 150 
+- mean size of fragment (-m): 200 
+- standard deviation of fragment (-s): 10.
+
+The following viral species and their corresponding European Nucleotide Archive ([ENA](https://www.ebi.ac.uk/ena/browser/home)) IDs were used as referenced and simulated at coverage (-f):10.
+- Corona virus	MN996532
+- Dengue virus	KF952702
+- Influenza virus	AB262394
+- Lambda bacteriophage	AB008394
+- M13 bacteriophage	AY389148
+- Norovirus	AB019423
+- T4 bacteriophage	JX183125
+
+Additionally, two bacteria were spiked in with coverage (-f):11. Names and NCBI acession IDs below:
+- Escherichi acoli GCF_008761535.2_ASM876153v3
+- Streptococcus pneumoniae GCA_002076835.1_ASM207683
+
+
+
+ <!--- 
+ Add longer description of your workflow's algorithmic contents 
+ --->
+
 
 ## Installation
 
-1. Clone repo from [Github](<https://github.com/MetaSUB-CAMP/camp_virus-phage-detect). 
-```Bash
-git clone https://github.com/MetaSUB-CAMP/camp_virus-phage-detect
-```
+1. Clone repo from [Github](<https://github.com/MetaSUB-CAMP/camp_viral_investigation). 
 
-2. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/virus-phage-detect.yaml`. 
-```Bash
-# Create and activate conda environment 
-cd camp_virus-phage-detect
-conda env create -f configs/conda/virus-phage-detect.yaml
-conda activate virus-phage-detect
-```
+2. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/viral_investigation.yaml`. 
 
 3. Update the relevant parameters (if applicable- for example, location of external non-conda tools) in `test_data/parameters.yaml`.
 
 4. Make sure the installed pipeline works correctly. 
-<!--- 
-Add runtime information of the module on the test dataset here. For example: With X threads and a maximum of Y GB allocated, the dataset should finish in approximately Z minutes.
---->
 ```Bash
+# Create and activate conda environment 
+cd camp_viral_investigation
+conda env create -f configs/conda/viral_investigation.yaml
+conda activate viral_investigation
 # Run tests on the included sample dataset
-python /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py test
+python /path/to/camp_viral_investigation/workflow/viral_investigation.py test
 ```
 
 ## Using the Module
@@ -46,22 +62,24 @@ python /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py test
 
 **Output**: 1) An output config file summarizing 2) the module's outputs. 
 
-- `/path/to/work/dir/virus-phage-detect/final_reports/samples.csv` for ingestion by the next module (ex. quality-checking)
-<!--- 
-Add description of your workflow's output files 
---->
+- `/path/to/work/dir/viral_investigation/final_reports/samples.csv` for ingestion by the next module (ex. quality-checking)
+.. ..
+
+ <!--- 
+ Add description of your workflow's output files 
+ --->
 
 ### Module Structure
 ```
 └── workflow
     ├── Snakefile
-    ├── virus-phage-detect.py
+    ├── viral_investigation.py
     ├── utils.py
     ├── __init__.py
     └── ext/
         └── scripts/
 ```
-- `workflow/virus-phage-detect.py`: Click-based CLI that wraps the `snakemake` and other commands for clean management of parameters, resources, and environment variables.
+- `workflow/viral_investigation.py`: Click-based CLI that wraps the `snakemake` and other commands for clean management of parameters, resources, and environment variables.
 - `workflow/Snakefile`: The `snakemake` pipeline. 
 - `workflow/utils.py`: Sample ingestion and work directory setup functions, and other utility functions used in the pipeline and the CLI.
 - `ext/`: External programs, scripts, and small auxiliary files that are not conda-compatible but used in the workflow.
@@ -76,72 +94,54 @@ Add description of your workflow's output files
 
 3. Update the computational resources available to the pipeline in `configs/resources.yaml`. 
 
-#### Command Line Deployment
-
-To run CAMP on the command line, use the following, where `/path/to/work/dir` is replaced with the absolute path of your chosen working directory, and `/path/to/samples.csv` is replaced with your copy of `samples.csv`. 
+4. To run CAMP on the command line, use the following, where `/path/to/work/dir` is replaced with the absolute path of your chosen working directory, and `/path/to/samples.csv` is replaced with your copy of `samples.csv`. 
     - The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
     - Relative or absolute paths to the Snakefile and/or the working directory (if you're running elsewhere) are accepted!
     - The parameters and resource config YAMLs can also be customized.
 ```Bash
-python /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py \
-    (-c number_of_cores_allocated) \
+python /path/to/camp_viral_investigation/workflow/viral_investigation.py \
+    (-c max_number_of_local_cpu_cores) \
     (-p /path/to/parameters.yaml) \
     (-r /path/to/resources.yaml) \
     -d /path/to/work/dir \
-    -s /path/to/samples.csv
+    -s /path/to/samples.csv 
 ```
 
-#### Slurm Cluster Deployment
-
-To run CAMP on a job submission cluster (for now, only Slurm is supported), use the following.
+5. To run CAMP on a job submission cluster (for now, only Slurm is supported), use the following.
     - `--slurm` is an optional flag that submits all rules in the Snakemake pipeline as `sbatch` jobs. 
-    - In Slurm mode, the `-c` flag refers to the maximum number of `sbatch` jobs submitted in parallel, **not** the pool of cores available to run the jobs. Each job will request the number of cores specified by threads in `configs/resources/slurm.yaml`.
+    - In Slurm mode, the `-c` flag refers to the maximum number of `sbatch` jobs submitted in parallel, **not** the pool of cores available to run the jobs. Each job will request the number of cores specified by threads in `configs/resources.yaml`.
 ```Bash
 sbatch -J jobname -o jobname.log << "EOF"
 #!/bin/bash
-python /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py --slurm \
+python /path/to/camp_viral_investigation/workflow/viral_investigation.py --slurm \
     (-c max_number_of_parallel_jobs_submitted) \
-    (-p /path/to/parameters.yaml) \
-    (-r /path/to/resources.yaml) \
     -d /path/to/work/dir \
     -s /path/to/samples.csv
 EOF
 ```
 
-#### Finishing Up
-
-1. To quality-check the processed FastQs, download and compare the collated MultiQC reports, which can be found at `/path/to/work/dir/short_read_qc/final_reports/*_multiqc_report/html`. Multiple rounds of preprocessing may be needed to fully get rid of low-quality bases, adapters, and duplicated sequences. 
-    - For example, the dataset I worked with required an additional round of `fastp` to trim 10 low-quality bases from the 5' and 4 low-quality bases from the 3' end respectively. 
-    - I recommend creating a new directory, which I've called `/path/to/work/dir/short_read_qc/5_retrimming` and placing reprocessed reads inside them. 
-    - Afterwards, I reran FastQC and MultiQC and collated summary statistics (ex. numbers of reads, etc.) from the reprocessed datasets manually. I also updated the location of the reprocessed reads in `/path/to/work/dir/short_read_qc/final_reports/samples.csv` to `/path/to/work/dir/short_read_qc/5_retrimming`.
-
-2. To plot grouped bar graph(s) of the number of reads and bases remaining after each quality control step in each sample, set up the dataviz environment and follow the instructions in the Jupyter notebook:
+6. After checking over `final_reports/` and making sure you have everything you need, you can delete all intermediate files to save space. 
 ```Bash
-conda env create -f configs/conda/dataviz.yaml
-conda activate dataviz
-jupyter notebook &
-```
-
-3. After checking over `final_reports/` and making sure you have everything you need, you can delete all intermediate files to save space. 
-```Bash
-python3 /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py cleanup \
+python /path/to/camp_viral_investigation/workflow/viral_investigation.py cleanup \
     -d /path/to/work/dir \
     -s /path/to/samples.csv
 ```
 
-4. If for some reason the module keeps failing, CAMP can print a script containing all of the remaining commands that can be run manually. 
+7. If for some reason the module keeps failing, CAMP can print a script called `commands.sh` containing all of the remaining commands that can be run manually. 
 ```Bash
-python3 /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py --dry_run \
+python /path/to/camp_viral_investigation/workflow/viral_investigation.py --dry_run \
     -d /path/to/work/dir \
     -s /path/to/samples.csv
 ```
+
+
 
 ## Credits
 
-- This package was created with [Cookiecutter](https://github.com/cookiecutter/cookiecutter>) as a simplified version of the [project template](https://github.com/audreyr/cookiecutter-pypackage>).
  
+- This package was created with [Cookiecutter](https://github.com/cookiecutter/cookiecutter>) as a simplified version of the [project template](https://github.com/audreyr/cookiecutter-pypackage>).
 - Free software: MIT License
-- Documentation: https://camp-documentation.readthedocs.io/en/latest/virus-phage-detect.html
+- Documentation: https://camp-documentation.readthedocs.io/en/latest/viral_investigation.html
 
 
 

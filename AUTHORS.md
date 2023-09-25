@@ -2,7 +2,7 @@
 
 ## Development Lead
 
-* y <y>: CAMP virus-phage-detect module development
+* Rodolfo Brizola Toscan <rbtoscan@gmail.com>: CAMP viral_investigation module development
 
 ## Contributors
 
