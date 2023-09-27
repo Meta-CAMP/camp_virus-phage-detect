@@ -1,4 +1,4 @@
-name: base
+name: new_vibrant
 channels:
   - anaconda
   - ostrokach
@@ -218,4 +218,3 @@ dependencies:
   - zlib=1.2.13=h166bdaf_4
   - zstandard=0.18.0=py37h540881e_0
   - zstd=1.5.2=h3eb15da_6
-prefix: /storage/tools/camp_viral_investigation/conda_envs/e174502604d8b97d0bd4feb2147b5506_

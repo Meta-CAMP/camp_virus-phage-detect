@@ -3,6 +3,8 @@
 
 # --- general --- #
 
+databases_path: '/storage-local/databases'
+
 some_constant:   2500
 
 
@@ -13,5 +15,5 @@ option: 'meta'
 
 # --- first_rule --- #
 #host_reference_database: '/storage/tools/camp_short-read-quality-control/Databases/GRCh38_28122022/GCA_000001405.15_GRCh38_genomic'
-vibrant_database: '/storage/tools/anaconda3/envs/vibrant_env/VIBRANT/databases/'
+vibrant_database: '/storage-local/test/databases/'
 other_constant:    10000

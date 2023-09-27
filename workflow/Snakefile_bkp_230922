@@ -120,31 +120,18 @@ rule vibrant:
 	log:                                 
 		join(dirs.LOG, '1.2_vibrant', '{sample}.out'),
 	conda:
-		join(config['env_yamls'], 'new_vibrant.yaml'),
+		join(config['env_yamls'], 'vibrant.yaml'),
 	threads: config['vibrant_rule_threads'],
 	params:
 		vibrant_script  = join(dirs_scr, 'VIBRANT_run.py'),
 		out_dir = join(dirs.OUT, '1.2_vibrant','{sample}'),
-		#vibrant_db = config['vibrant_database'],
-		databases_path = config['databases_path'],
+		vibrant_db = config['vibrant_database'],
 	shell:
-		"""
-		# setup database in case it doesn't exist!
-		#bin="$(which VIBRANT_run.py | rev |  cut -c 15- | rev )"
-		if [ ! -f {params.databases_path}/VIBRANT/databases/KEGG_profiles_prokaryotes.HMM ]; then 
-			mkdir -p {params.databases_path}
-			cd {params.databases_path}
-			git clone https://github.com/AnantharamanLab/VIBRANT.git
-			cd VIBRANT/databases
-			python VIBRANT_setup.py
-		#	cd -
-			else :; 
-		fi
-		
-		VIBRANT_run.py -i {input.ctg} -t {threads} -d {params.databases_path}/VIBRANT/databases/ -folder {params.out_dir}
+                """
+		#python {params.vibrant_script} -i {input.ctg} -t {threads} -d {params.vibrant_db} -folder {params.out_dir}
+		VIBRANT_run.py -i {input.ctg} -t {threads} -d {params.vibrant_db} -folder {params.out_dir}
 		cat {params.out_dir}/*/*/*fna | grep ">" | sed "s/_fragment_1//g;s/>//g" >  {params.out_dir}/vibrant_detected_viruses.txt
-		touch {output.vibrant_out}
-		"""
+                """
 
 rule virsorter:
 	# Runs virsorter.
@@ -170,7 +157,7 @@ rule virsorter:
 	shell:
 		"""
 		# setup database in case it doesn't exist!
-		db_path="$(echo "$(which virsorter)" | rev |  cut -c 10- | rev )database"
+		db_path="$(echo "$(which virsorter)" | rev |  cut -c 10- | rev )"
 		if [ ! -d "$db_path" ]; then virsorter setup -d "$db_path" -j 4; else :; fi
 
 		virsorter run -w {params.out_dir} -d "$db_path" -i {input.ctg} --min-length {params.min_length} -j {threads}

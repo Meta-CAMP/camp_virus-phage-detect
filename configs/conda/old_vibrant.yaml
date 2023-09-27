@@ -1,4 +1,4 @@
-name: base
+name: vibrant
 channels:
   - anaconda
   - ostrokach
@@ -18,16 +18,15 @@ dependencies:
   - brotlipy=0.7.0=py37h540881e_1004
   - bzip2=1.0.8=h7f98852_4
   - c-ares=1.18.1=h7f98852_0
-  - ca-certificates=2023.01.10=h06a4308_0
+  - ca-certificates=2022.12.7=ha878542_0
   - cairo=1.16.0=ha61ee94_1014
   - certifi=2022.12.7=pyhd8ed1ab_0
   - cffi=1.15.1=py37h43b0acd_1
   - charset-normalizer=2.1.1=pyhd8ed1ab_0
   - colorama=0.4.6=pyhd8ed1ab_0
-  - conda=22.11.1=py37h06a4308_4
+  - conda=22.9.0=py37h89c1867_1
   - conda-package-handling=2.0.2=pyh38be061_0
   - conda-package-streaming=0.7.0=pyhd8ed1ab_1
-  - coreutils=9.2=h0b41bf4_0
   - cryptography=38.0.2=py37h38fbfac_1
   - cycler=0.11.0=pyhd8ed1ab_0
   - dbus=1.13.6=h5008d03_3
@@ -191,7 +190,7 @@ dependencies:
   - tzdata=2022g=h191b570_0
   - unicodedata2=14.0.0=py37h540881e_1
   - urllib3=1.26.15=pyhd8ed1ab_0
-  - vibrant=1.2.1=hdfd78af_4
+  - vibrant=1.2.0=2
   - wget=1.21.3=h0b77cf5_0
   - wheel=0.40.0=pyhd8ed1ab_0
   - xcb-util=0.4.0=h516909a_0
@@ -218,4 +217,3 @@ dependencies:
   - zlib=1.2.13=h166bdaf_4
   - zstandard=0.18.0=py37h540881e_0
   - zstd=1.5.2=h3eb15da_6
-prefix: /storage/tools/camp_viral_investigation/conda_envs/e174502604d8b97d0bd4feb2147b5506_
