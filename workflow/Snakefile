@@ -120,7 +120,7 @@ rule vibrant:
 	log:                                 
 		join(dirs.LOG, '1.2_vibrant', '{sample}.out'),
 	conda:
-		join(config['env_yamls'], 'new_vibrant.yaml'),
+		join(config['env_yamls'], 'vibrant.yaml'),
 	threads: config['vibrant_rule_threads'],
 	params:
 		vibrant_script  = join(dirs_scr, 'VIBRANT_run.py'),
