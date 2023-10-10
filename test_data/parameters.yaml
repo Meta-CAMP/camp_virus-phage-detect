@@ -4,12 +4,13 @@
 # --- general --- #
 
 databases_path: '/storage-local/databases'
-external_scripts: '/path/to/workflow/ext'
+
 some_constant:   2500
 
 
 # assembly option
 option: 'meta'
+
 
 
 # --- first_rule --- #

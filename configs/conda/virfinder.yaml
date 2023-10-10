@@ -1,4 +1,4 @@
-name: virfinder_env
+name: virfinder
 channels:
   - conda-forge
   - bioconda

@@ -1,0 +1,23 @@
+#'''Computational resource config.'''#
+
+# assembly
+
+count_reads_mem_mb: 1000
+# # --- general --- #
+#
+assembly_threads: 2
+assembly_mem_mb:  2000
+
+
+# --- vibrant --- #
+
+vibrant_rule_threads: 2
+first_rule_mem_mb: 2000
+
+# --- virsorter --- #
+virsorter_rule_threads: 2
+virsorter_min_contig_length: 1500
+
+# --- checkv --- #
+checkv_rule_threads: 20
+

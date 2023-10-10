@@ -1,4 +1,4 @@
-name: camp_virus-phage-detect
+name: virus-phage-detect
 channels:
   - coecms
   - conda-forge

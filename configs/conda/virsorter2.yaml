@@ -1,4 +1,4 @@
-name: virsorter2_camp_env
+name: virsorter2
 channels:
   - conda-forge
   - bioconda

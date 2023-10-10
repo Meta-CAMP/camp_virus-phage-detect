@@ -1,0 +1,2 @@
+sample_name,illumina_fwd,illumina_rev
+commA,/test_data/commA_1.fastq.gz,/test_data/commA_2.fastq.gz
