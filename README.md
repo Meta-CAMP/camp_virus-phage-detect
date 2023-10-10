@@ -50,11 +50,11 @@ Additionally, two bacteria were spiked in with coverage (-f):11. Names and NCBI 
 4. Make sure the installed pipeline works correctly. 
 ```Bash
 # Create and activate conda environment 
-cd camp_viral_investigation
-conda env create -f configs/conda/viral_investigation.yaml
-conda activate viral_investigation
+cd camp_virus-phage-detect
+conda env create -f configs/conda/camp_virus-phage-detect.yaml
+conda activate camp_virus-phage-detect
 # Run tests on the included sample dataset
-python /path/to/camp_viral_investigation/workflow/viral_investigation.py test
+python /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py test
 ```
 
 ## Using the Module
