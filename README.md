@@ -41,13 +41,14 @@ Additionally, two bacteria were spiked in with coverage (-f):11. Names and NCBI 
 
 ## Installation
 
-1. Clone repo from [Github](<https://github.com/MetaSUB-CAMP/camp_virus-phage-detect). 
+1. Clone repo from
+  ` git clone git@github.com:MetaSUB-CAMP/camp_virus-phage-detect.git`
 
-2. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/virus-phage-detect.yaml`. 
+3. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/virus-phage-detect.yaml`. 
 
-3. Update the relevant parameters (if applicable- for example, location of external non-conda tools) in `test_data/parameters.yaml`.
+4. Update the relevant parameters (if applicable- for example, location of external non-conda tools) in `test_data/parameters.yaml`.
 
-4. Make sure the installed pipeline works correctly. 
+5. Make sure the installed pipeline works correctly. 
 ```Bash
 # Create and activate conda environment 
 cd camp_virus-phage-detect
