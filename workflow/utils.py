@@ -55,7 +55,7 @@ class Workflow_Dirs:
     LOG = ''
 
     def __init__(self, work_dir, module):
-        self.OUT = join(work_dir, 'viral_investigation')
+        self.OUT = join(work_dir, 'virus-phage-detect')
         self.TMP = join(work_dir, 'tmp') 
         self.LOG = join(work_dir, 'logs') 
         # Add custom subdirectories to organize intermediate files

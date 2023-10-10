@@ -1,4 +1,4 @@
-'''CLI for the CAMP viral_investigation module.'''
+'''CLI for the CAMP virus-phage-detect module.'''
 
 
 import click
@@ -120,7 +120,7 @@ def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock,
                cores, env_dir, join(main_dir, 'configs', 'sbatch'))
     elif dry_run:
         # Set up the directory structure skeleton
-        Workflow_Dirs(work_dir, 'viral_investigation')
+        Workflow_Dirs(work_dir, 'virus-phage-detect')
         # Print the dry run standard out
         f = io.StringIO()
         with redirect_stdout(f):
