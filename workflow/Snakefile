@@ -1,4 +1,4 @@
-'''Workflow for the CAMP viral_investigation module.'''
+'''Workflow for the CAMP virus-phage-detect module.'''
 
 
 from contextlib import redirect_stderr
@@ -10,7 +10,7 @@ from utils import Workflow_Dirs, ingest_samples
 
 
 # Load and/or make the working directory structure
-dirs = Workflow_Dirs(config['work_dir'], 'viral_investigation')
+dirs = Workflow_Dirs(config['work_dir'], 'virus-phage-detect')
 
 
 # Load sample names and input files 
@@ -38,7 +38,7 @@ rule all:
 		#join(dirs.OUT,  'orfs.fa')
 		#fa = join(dirs.OUT,  '{sample}_orfs.fa')
 		#fa = join(dirs.OUT, 'orfs.fa')
-		#join(dirs.OUT, 'viral_investigation_finished') 
+		#join(dirs.OUT, 'virus-phage-detect_finished') 
 		#expand(join(dirs.OUT, '_dereplication','{sample}','virsorter_virfinder_vibrant_contigs.fa'),sample=SAMPLES),
 		expand(join(dirs.OUT, '3_checkv','{sample}','quality_summary.tsv'),sample=SAMPLES),
 
