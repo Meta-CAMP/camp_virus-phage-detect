@@ -13,6 +13,7 @@ from utils import Workflow_Dirs, ingest_samples
 dirs = Workflow_Dirs(config['work_dir'], 'virus-phage-detect')
 
 
+
 # Load sample names and input files 
 SAMPLES = ingest_samples(config['samples'], dirs.TMP)
 
@@ -114,6 +115,7 @@ rule vibrant:
 		# add code that eliminates temporary files that won't be processed
 	input:
 		ctg = join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
+		flag = join(dirs.OUT, '.databases_setup','vibrant')
 		#ctg = join(dirs.TMP, '{sample}.fasta'),
 	output:
 		vibrant_out =  join(dirs.OUT,  '1.2_vibrant','{sample}','vibrant_detected_viruses.txt')
@@ -126,20 +128,20 @@ rule vibrant:
 		vibrant_script  = join(dirs_scr, 'VIBRANT_run.py'),
 		out_dir = join(dirs.OUT, '1.2_vibrant','{sample}'),
 		#vibrant_db = config['vibrant_database'],
-		databases_path = config['databases_path'],
+		databases_path = config['databases_path_new_way'],
 	shell:
 		"""
 		# setup database in case it doesn't exist!
 		#bin="$(which VIBRANT_run.py | rev |  cut -c 15- | rev )"
-		if [ ! -f {params.databases_path}/VIBRANT/databases/KEGG_profiles_prokaryotes.HMM ]; then 
-			mkdir -p {params.databases_path}
-			cd {params.databases_path}
-			git clone https://github.com/AnantharamanLab/VIBRANT.git
-			cd VIBRANT/databases
-			python VIBRANT_setup.py
+		#if [ ! -f {params.databases_path}/VIBRANT/databases/KEGG_profiles_prokaryotes.HMM ]; then 
+		#	mkdir -p {params.databases_path}
+		#	cd {params.databases_path}
+		#	git clone https://github.com/AnantharamanLab/VIBRANT.git
+		#	cd VIBRANT/databases
+		#	python VIBRANT_setup.py
 		#	cd -
-			else :; 
-		fi
+		#	else :; 
+		#fi
 		
 		VIBRANT_run.py -i {input.ctg} -t {threads} -d {params.databases_path}/VIBRANT/databases/ -folder {params.out_dir}
 		cat {params.out_dir}/*/*/*fna | grep ">" | sed "s/_fragment_1//g;s/>//g" >  {params.out_dir}/vibrant_detected_viruses.txt
@@ -209,34 +211,6 @@ rule virfinder:
 		bash {params.virfinder_parse_script} {params.out_dir}/virfinder_output.txt {output.virfinder_out_txt}
 		"""
 
-#rule join_viral_identification_tools:
-        # Joins all results from vibrant, virsorte and virfinder (and viralverify)
-        # input are the paths to the outputed folder from the three viral tools
-        # output is a fasta file containing the union of those outputs
-        # to do
-#        input:
-#                virsorter = join(dirs.TMP,'{sample}_virsorter' ),
-#                vibrant =   join(dirs.TMP,'{sample}_vibrant' ),
-#                virfinder = join(dirs.TMP,'{sample}_virfinder' ),
-#        output:
-#                merged = join(dirs.OUT,  '{sample}_virfinder'),
-#        log:
-#                join(dirs.LOG, 'map_sort', '{sample}.out'),
-       # threads: config['virsorter_rule_threads'],
-#        params:
-            #    out_dir = join(dirs.OUT,  '{sample}', '_prodigal'),
-#        shell:
- #               """
-                ## cat virsorter_test/*fa | grep ">" | sed "s/_fragment_1//g;s/>//g" | cut -f1 -d "|" > virsorter_results
-                ## cat virfinder/*output.tsv | awk -F'\t' '{ if ( $4 <= 0.01) print }' | awk -F'_' '{ if ( $4 >= 1000) print }' | cut -f2 | sed "s/\"//g" > virfinder_results
-                ## cat vibrant_test/*scaffolds/*phages*scaffolds/*phages*combined.fna  | grep ">" | sed "s/_fragment_1//g;s/>//g" > vibrant_results
-
-                #cat {input.virsorter}/*fa | grep ">" | sed "s/_fragment_1//g;s/>//g" | cut -f1 -d "|" > virsorter_results
-                #cat {input.virfinder}/*output.tsv | awk -F'\t' '{ if ( $4 <= 0.01) print }' | awk -F'_' '{ if ( $4 >= 1000) print }' | cut -f2 | sed "s/\"//g" > virfinder_results
-                #cat {input.vibrant}/*scaffolds/*phages*scaffolds/*phages*combined.fna  | grep ">" | sed "s/_fragment_1//g;s/>//g" > vibrant_results
-
- #              """
-
 
 rule join_viral_identification_tools:
 	input:
@@ -274,7 +248,6 @@ rule join_viral_identification_tools:
 rule checkv:
 	input:
 		dereplicated_viruses = expand(join(dirs.OUT, '2_dereplication','{sample}','viral_contigs_dereplicated_95-70.fa'),sample=SAMPLES),
-		
 	output:
 		out= expand(join(dirs.OUT, '3_checkv','{sample}','quality_summary.tsv'),sample=SAMPLES),
 	params:
@@ -289,6 +262,29 @@ rule checkv:
 		checkv end_to_end {input.dereplicated_viruses} {params.output_folder} -t  {threads} -d /storage/databases/checkv-db-v1.5
 		"""
 
+rule vibrant_database_setup: # how to use different conda environments in the same rule?
+	#input:
+	#	ctg = join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
+	output:
+		flag = join(dirs.OUT, '.databases_setup','vibrant'),
+	params:
+		db_path = config['databases_path_new_way'],
+	conda:
+		join(config['env_yamls'], 'vibrant.yaml'),
+	threads: config['installation_threads'],
+	shell:
+		"""
+		if [ ! -f {params.db_path}/VIBRANT/databases/KEGG_profiles_prokaryotes.HMM ]; then 
+			mkdir -p {params.db_path}
+			cd {params.db_path}
+			git clone https://github.com/AnantharamanLab/VIBRANT.git
+			cd VIBRANT/databases
+			python VIBRANT_setup.py
+		#	cd -
+			else :; 
+		fi
+		touch {output.flag}
+		"""
 
 #rule make_config:
 #    input:

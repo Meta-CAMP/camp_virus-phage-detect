@@ -4,6 +4,7 @@
 # --- general --- #
 
 databases_path: '/storage-local/databases'
+databases_path_new_way: '/storage-local/databases_new_way'
 external_scripts: '/path/to/workflow/ext'
 some_constant:   2500
 
