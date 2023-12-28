@@ -13,19 +13,17 @@ from utils import Workflow_Dirs, ingest_samples
 dirs = Workflow_Dirs(config['work_dir'], 'virus-phage-detect')
 
 
-
 # Load sample names and input files 
 SAMPLES = ingest_samples(config['samples'], dirs.TMP)
 
 
 # Specify the location of any external resources and scripts
-dirs_ext = join(dirname(abspath(__file__)), 'ext')
+dirs_ext = config['ext']
 dirs_scr = join(dirs_ext, 'scripts')
+vibrant_db = join(config['db_path'], 'VIBRANT', 'databases')
+virsorter_db = join(config['db_path'], 'virsorter')
+checkv_db = join(config['db_path'], 'checkv-db-v1.5')
 
-path=os.path.abspath(os.getcwd())
-dirs_scr=path+"/workflow/ext/scripts/"
-
-print (SAMPLES)
 
 # --- Workflow output --- #
 
@@ -34,14 +32,10 @@ if config['option'] != '':
 else:
     option = ''
 
+
 rule all:
 	input:
-		#join(dirs.OUT,  'orfs.fa')
-		#fa = join(dirs.OUT,  '{sample}_orfs.fa')
-		#fa = join(dirs.OUT, 'orfs.fa')
-		#join(dirs.OUT, 'virus-phage-detect_finished') 
-		#expand(join(dirs.OUT, '_dereplication','{sample}','virsorter_virfinder_vibrant_contigs.fa'),sample=SAMPLES),
-		expand(join(dirs.OUT, '3_checkv','{sample}','quality_summary.tsv'),sample=SAMPLES),
+		expand(join(dirs.OUT, 'final_reports','{sample}_quality_summary.tsv'), sample=SAMPLES)
 
 
 rule metaspades_assembly:
@@ -49,9 +43,10 @@ rule metaspades_assembly:
         fwd = join(dirs.TMP,'{sample}_1.fastq.gz'),
         rev = join(dirs.TMP,'{sample}_2.fastq.gz'),
     output:
-        join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
+        ctg = join(dirs.OUT,'0_metaspades','{sample}','scaffolds.fasta'),
+        assembly_graph = join(dirs.OUT,'0_metaspades','{sample}','K55','assembly_graph_with_scaffolds.gfa'),
     log:
-        join(dirs.LOG, '0_metaspades', '{sample}.out'),
+        join(dirs.LOG, 'metaspades', '{sample}.out'),
     conda:
         join(config['env_yamls'], 'assemblers.yaml'),
     threads:
@@ -64,13 +59,13 @@ rule metaspades_assembly:
     shell:
         """
         if [ -f "{params.out_dir}/K33/assembly_graph.fastg" ]; then
-            spades.py --only-assembler {params.option} --restart-from k55 -o {params.out_dir} -t {threads} -m {resources.mem_mb} # Restart from k = 55
+            spades.py --only-assembler {params.option} --restart-from k55 -o {params.out_dir} -t {threads} -m {resources.mem_mb} >> {log} 2>&1 # Restart from k = 55
         elif [ -f "{params.out_dir}/K21/assembly_graph.fastg" ]; then
-            spades.py --only-assembler {params.option} --restart-from k33 -o {params.out_dir} -t {threads} -m {resources.mem_mb} # Restart from k = 33
+            spades.py --only-assembler {params.option} --restart-from k33 -o {params.out_dir} -t {threads} -m {resources.mem_mb} >> {log} 2>&1 # Restart from k = 33
         elif [ -f "{params.out_dir}/corrected.yaml" ]; then
-            spades.py --only-assembler {params.option} --restart-from k21 -o {params.out_dir} -t {threads} -m {resources.mem_mb} # Restart from k = 21
+            spades.py --only-assembler {params.option} --restart-from k21 -o {params.out_dir} -t {threads} -m {resources.mem_mb} >> {log} 2>&1 # Restart from k = 21
         else
-            spades.py --only-assembler {params.option} -t {threads} -m {resources.mem_mb} -1 {input.fwd} -2 {input.rev} -o {params.out_dir} 
+            spades.py --only-assembler {params.option} -t {threads} -m {resources.mem_mb} -1 {input.fwd} -2 {input.rev} -o {params.out_dir} > {log} 2>&1
         fi
         """    
 
@@ -79,12 +74,11 @@ rule viralverify:
 	input:
 		fwd = join(dirs.TMP,'{sample}_1.fastq.gz'),
 		rev = join(dirs.TMP,'{sample}_2.fastq.gz'),
-		ctg = join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
-		#assembly_folder =  join(dirs.OUT,'0_metaspades','{sample}'), #, 'K55','assembly_graph_with_scaffolds.gfa'),
+		assembly_graph = join(dirs.OUT,'0_metaspades','{sample}','K55','assembly_graph_with_scaffolds.gfa'),
 	output:
 		join(dirs.OUT,'1.1_viralverify','{sample}', 'scaffolds.fasta'),
 	log:
-		join(dirs.LOG, '1.1_viralverify', '{sample}.out'),
+		join(dirs.LOG, 'viralverify', '{sample}.out'),
 	conda:
 		join(config['env_yamls'], 'assemblers.yaml'),
 	threads:
@@ -93,16 +87,12 @@ rule viralverify:
 		mem_mb = config['assembly_mem_mb'],
 	params:
 		out_dir = join(dirs.OUT,'1.1_viralverify','{sample}'),
-		assembly_graph = join(dirs.OUT,'0_metaspades','{sample}','K55','assembly_graph_with_scaffolds.gfa'),
 		option = option,
 	shell:
 		"""
-		spades.py --metaviral --only-assembler -t {threads}  -m {resources.mem_mb}  -1 {input.fwd} -2 {input.rev} --assembly-graph {params.assembly_graph}  -k55  -o  {params.out_dir} 
-
-		# template #
-		###spades.py --only-assembler {params.option} -t {threads} -m {resources.mem_mb} -1 {input.fwd} -2 {input.rev}			  -o {params.out_dir} 
-
-		"""    
+		spades.py --metaviral --only-assembler -t {threads} -m {resources.mem_mb} -1 {input.fwd} -2 {input.rev} \
+			--assembly-graph {input.assembly_graph} -k55 -o {params.out_dir} > {log} 2>&1 
+		"""
 
 
 rule vibrant:
@@ -114,37 +104,23 @@ rule vibrant:
 		# add code that eliminates temporary files that won't be processed
 	input:
 		ctg = join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
-		flag = join(dirs.OUT, '.databases_setup','vibrant')
-		#ctg = join(dirs.TMP, '{sample}.fasta'),
+		flag = join(dirs_ext,'vibrant.db_setup'),
 	output:
-		vibrant_out =  join(dirs.OUT,  '1.2_vibrant','{sample}','vibrant_detected_viruses.txt')
+		join(dirs.OUT,  '1.2_vibrant','{sample}','vibrant_detected_viruses.txt'),
 	log:                                 
-		join(dirs.LOG, '1.2_vibrant', '{sample}.out'),
+		join(dirs.LOG, 'vibrant', '{sample}.out'),
 	conda:
 		join(config['env_yamls'], 'vibrant.yaml'),
-	threads: config['vibrant_rule_threads'],
+	threads: config['vibrant_threads'],
 	params:
-		vibrant_script  = join(dirs_scr, 'VIBRANT_run.py'),
 		out_dir = join(dirs.OUT, '1.2_vibrant','{sample}'),
-		databases_path = config['databases_path_new_way'],
+		vibrant_db = vibrant_db,
 	shell:
 		"""
-		# setup database in case it doesn't exist!
-		#bin="$(which VIBRANT_run.py | rev |  cut -c 15- | rev )"
-		#if [ ! -f {params.databases_path}/VIBRANT/databases/KEGG_profiles_prokaryotes.HMM ]; then 
-		#	mkdir -p {params.databases_path}
-		#	cd {params.databases_path}
-		#	git clone https://github.com/AnantharamanLab/VIBRANT.git
-		#	cd VIBRANT/databases
-		#	python VIBRANT_setup.py
-		#	cd -
-		#	else :; 
-		#fi
-		
-		VIBRANT_run.py -i {input.ctg} -t {threads} -d {params.databases_path}/VIBRANT/databases/ -folder {params.out_dir}
-		cat {params.out_dir}/*/*/*fna | grep ">" | sed "s/_fragment_1//g;s/>//g" >  {params.out_dir}/vibrant_detected_viruses.txt
-		touch {output.vibrant_out}
+		VIBRANT_run.py -i {input.ctg} -t {threads} -d {params.vibrant_db} -folder {params.out_dir} > {log} 2>&1
+		cat {params.out_dir}/*/*/*fna | grep ">" | sed "s/_fragment_1//g;s/>//g" >  {output}
 		"""
+
 
 rule virsorter:
 	# Runs virsorter.
@@ -156,29 +132,24 @@ rule virsorter:
 		# add conda load
 	input:
 		ctg = join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
-		#ctg = join(dirs.TMP, '{sample}.fasta'),
+		flag = join(dirs_ext, 'virsorter.db_setup'),
 	output:
-		virsorter_out = join(dirs.OUT, '1.3_virsorter','{sample}','virsorter_detected_viruses.txt'),
+		join(dirs.OUT, '1.3_virsorter','{sample}','virsorter_detected_viruses.txt'),
 	log:
-		join(dirs.LOG, '1.3_virsorter', '{sample}.out'),
+		join(dirs.LOG, 'virsorter', '{sample}.out'),
 	conda:
 		join(config['env_yamls'], 'virsorter2.yaml'),
-	threads: config['virsorter_rule_threads'],
+	threads: config['virsorter_threads'],
 	params: 
-		databases_path = config['databases_path_new_way'],
+		virsorter_db = virsorter_db,
 		out_dir = join(dirs.OUT,  '1.3_virsorter','{sample}'),
-		min_length = config['virsorter_min_contig_length'],
+		min_len = config['min_ctg_len'],
 	shell:
 		"""
-		# setup database in case it doesn't exist!
-		#db_path="$(echo "$(which virsorter)" | rev |  cut -c 10- | rev )database"
-		#if [ ! -d "$db_path" ]; then virsorter setup -d "$db_path" -j 4; else :; fi
-
-		virsorter run -w {params.out_dir} -d {params.databases_path} -i {input.ctg} --min-length {params.min_length} -j {threads}
-		#cp {params.out_dir}/final-viral-combined.fa {params.out_dir}/virsorter_detected_viruses.fasta
-		cat {params.out_dir}/final-viral-combined.fa | grep ">" | sed "s/_fragment_1//g;s/>//g" | cut -f1 -d "|" > {params.out_dir}/virsorter_detected_viruses.txt	
-	
+		virsorter run -w {params.out_dir} -d {params.virsorter_db} -i {input.ctg} --min-length {params.min_len} -j {threads} > {log} 2>&1
+		cat {params.out_dir}/final-viral-combined.fa | grep ">" | sed "s/_fragment_1//g;s/>//g" | cut -f1 -d "|" > {output}
 		"""
+
 
 rule virfinder:
 	# Runs virfinder.
@@ -187,141 +158,135 @@ rule virfinder:
 	# to do
 		# add conda load
 	input:
-		ctg = join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
-		#ctg = join(dirs.TMP, '{sample}.fasta'),
+		join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
 	output:
-		virfinder_out_txt = join(dirs.OUT, '1.4_virfinder','{sample}','virfinder_detected_viruses.txt'),
-	log:
-		join(dirs.LOG, '1.4_virfinder', '{sample}.out'),
+		join(dirs.OUT, '1.4_virfinder','{sample}','virfinder_detected_viruses.txt'),
 	conda:
 		join(config['env_yamls'], 'virfinder.yaml'),
-	threads: config['virsorter_rule_threads'],
+	threads: config['virsorter_threads'],
 	params:
-		virfinder_script  = join(dirs_scr, 'virfinder_script.r'),
-		virfinder_parse_script = join(dirs_scr, 'virfinder_results_parse.sh'),
+		virfinder_scr  = join(dirs_scr, 'virfinder_script.r'),
+		parse_scr = join(dirs_scr, 'virfinder_results_parse.sh'),
 		out_dir = join(dirs.OUT, '1.4_virfinder','{sample}'),
-		
 	shell:
 		"""
-		#### Rscript $CONDA_PREFIX/VirFinder/virfinder_script.r /storage/tools/virfinder ZRH_15-scaffolds.fasta virfinder_output.tsv
-		
-		cp {input.ctg} {params.out_dir}/contigs.fa
-		Rscript {params.virfinder_script} {params.out_dir} contigs.fa virfinder_output.txt
-		bash {params.virfinder_parse_script} {params.out_dir}/virfinder_output.txt {output.virfinder_out_txt}
+		cp {input} {params.out_dir}/contigs.fa
+		Rscript {params.virfinder_scr} {params.out_dir} contigs.fa virfinder_output.txt
+		bash {params.parse_scr} {params.out_dir}/virfinder_output.txt {output}
 		"""
 
 
-rule join_viral_identification_tools:
+rule concat_inferences:
 	input:
-		fa_assembly =     expand(join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),sample=SAMPLES),
-		fa_viralverify =  expand(join(dirs.OUT,'1.1_viralverify','{sample}','scaffolds.fasta'),sample=SAMPLES),
-		fa_vibrant = 	  expand(join(dirs.OUT,'1.2_vibrant'    ,'{sample}','vibrant_detected_viruses.txt'),sample=SAMPLES),
-		fa_virsorter = 	  expand(join(dirs.OUT,'1.3_virsorter',  '{sample}','virsorter_detected_viruses.txt'),sample=SAMPLES),	
-		fa_virfinder = 	  expand(join(dirs.OUT,'1.4_virfinder',  '{sample}','virfinder_detected_viruses.txt'),sample=SAMPLES),	
+		fa_assembly =     join(dirs.OUT,'0_metaspades','{sample}', 'scaffolds.fasta'),
+		fa_viralverify =  join(dirs.OUT,'1.1_viralverify','{sample}','scaffolds.fasta'),
+		fa_vibrant = 	  join(dirs.OUT,'1.2_vibrant'    ,'{sample}','vibrant_detected_viruses.txt'),
+		fa_virsorter = 	  join(dirs.OUT,'1.3_virsorter',  '{sample}','virsorter_detected_viruses.txt'),
+		fa_virfinder = 	  join(dirs.OUT,'1.4_virfinder',  '{sample}','virfinder_detected_viruses.txt'),
 	output:
-		#out= expand(join(dirs.OUT, '2_dereplication','{sample}','virsorter_virfinder_vibrant_contigs.fa'),sample=SAMPLES),
-		out= expand(join(dirs.OUT, '2_dereplication','{sample}','viral_contigs_dereplicated_95-70.fa'),sample=SAMPLES),
-	#log:
-#		join(dirs.LOG, '2_dereplication', '{sample}.out'),
+		join(dirs.OUT,'2_dereplication','{sample}','contigs_derep.fa'),
 	params:
-		out_ids= expand(join(dirs.OUT, '2_dereplication','{sample}','virsorter_virfinder_vibrant_ids.txt'),sample=SAMPLES),
-		joined_tools = expand(join(dirs.OUT, '2_dereplication','{sample}','virsorter_virfinder_vibrant_contigs.fa'),sample=SAMPLES),
-		out_dir =  expand(join(dirs.OUT, '2_dereplication','{sample}'),sample=SAMPLES),
-		faSomeRecords  = join(dirs_scr, 'faSomeRecords.py'),
-		clustergenome = join(dirs_scr, 'Cluster_genomes.pl'),
+		out_ids = join(dirs.OUT, '2_dereplication','{sample}','merged_ids.txt'),
+		merged_fa = join(dirs.OUT, '2_dereplication','{sample}','tmp_contigs.fa'),
+		out_dir =  join(dirs.OUT, '2_dereplication','{sample}'),
+		processing_scr  = join(dirs_scr, 'faSomeRecords.py'),
 	shell:
 		"""
-		cat {input.fa_vibrant} {input.fa_virsorter} {input.fa_virfinder} | sort | uniq > {params.out_ids}
-		python {params.faSomeRecords} -f {input.fa_assembly} -l {params.out_ids} --outfile  {params.joined_tools}
-		cp {input.fa_viralverify} {params.out_dir}/viralverify.fa
-		cat {params.out_dir}/viralverify.fa {params.joined_tools} > {params.out_dir}/all_viral_contigs.fa
+		cat {input.fa_vibrant} {input.fa_virsorter} {input.fa_virfinder} | sort | uniq > {params.out_ids} # TODO check outputs- does this do what we think it does? 
+		python {params.processing_scr} -f {input.fa_assembly} -l {params.out_ids} --outfile {params.merged_fa}
+		cat {input.fa_viralverify} {params.merged_fa} > {output}
+		"""
 
-		{params.clustergenome} -f {params.out_dir}/all_viral_contigs.fa -c 70 -i 95 
 
-		cp {params.out_dir}/all_viral_contigs.fa {output.out}
-
-		#touch {output}
+rule dereplication:
+	input:
+		join(dirs.OUT,'2_dereplication','{sample}','contigs_derep.fa'),
+	output:
+		join(dirs.OUT, '2_dereplication','{sample}','contigs_derep_95-70.fna'),
+	params:
+		cluster_scr = join(dirs_scr, 'Cluster_genomes.pl'),
+	shell:
+		"""
+		{params.cluster_scr} -f {input} -c 70 -i 95 # TODO what do these mean? Make toggle-able?
 		"""
 
 
 rule checkv:
 	input:
-		dereplicated_viruses = expand(join(dirs.OUT, '2_dereplication','{sample}','viral_contigs_dereplicated_95-70.fa'),sample=SAMPLES),
+		ctg = join(dirs.OUT, '2_dereplication','{sample}','contigs_derep_95-70.fna'),
+		flag =  join(dirs_ext,'checkv.db_setup'),
 	output:
-		out= expand(join(dirs.OUT, '3_checkv','{sample}','quality_summary.tsv'),sample=SAMPLES),
-	params:
-		output_folder = expand(join(dirs.OUT, '3_checkv','{sample}'),sample=SAMPLES),
-	#log:
-	#	join(dirs.LOG, 'checkv', '{sample}.out'),
+		join(dirs.OUT, 'final_reports','{sample}_quality_summary.tsv'),
+	log:
+		join(dirs.LOG, 'checkv', '{sample}.out'),
 	conda:
 		join(config['env_yamls'], 'checkv.yaml'),
-	threads: config['checkv_rule_threads'],
+	threads: config['checkv_threads'],
+	params:
+		out_dir = join(dirs.OUT, '3_checkv','{sample}'),
+		checkv_db = checkv_db,
 	shell:
 		"""
-		checkv end_to_end {input.dereplicated_viruses} {params.output_folder} -t  {threads} -d /storage/databases/checkv-db-v1.5
+		checkv end_to_end {input.ctg} {params.out_dir} -t {threads} -d {params.checkv_db} > {log} 2>&1 
+		cp {params.out_dir}/quality_summary.tsv {output}
 		"""
 
-rule vibrant_database_setup: # HOW DOES IT behave for several samples?
+
+rule vibrant_db_setup: # HOW DOES IT behave for several samples?
 	output:
-		flag = join(dirs.OUT, '.databases_setup','vibrant'),
-	params:
-		db_path = config['databases_path_new_way'],
+		join(dirs_ext,'vibrant.db_setup'),
 	conda:
 		join(config['env_yamls'], 'vibrant.yaml'),
 	threads: config['installation_threads'],
+	params:
+		db_path = config['db_path'],
 	shell:
 		"""
 		if [ ! -f {params.db_path}/VIBRANT/databases/KEGG_profiles_prokaryotes.HMM ]; then 
-			mkdir -p {params.db_path}
 			cd {params.db_path}
 			git clone https://github.com/AnantharamanLab/VIBRANT.git
 			cd VIBRANT/databases
 			python VIBRANT_setup.py
-		#	cd -
 			else :; 
 		fi
-		touch {output.flag}
+		touch {output}
 		"""
 
-rule virsorter_database_setup: # HOW DOES IT behave for several samples?
+
+rule virsorter_db_setup: # HOW DOES IT behave for several samples?
 	output:
-		flag = join(dirs.OUT, '.databases_setup','virsorter'),
-	params:
-		db_path = config['databases_path_new_way'],
+		join(dirs_ext, 'virsorter.db_setup'),
 	conda:
 		join(config['env_yamls'], 'virsorter2.yaml'),
 	threads: config['installation_threads'],
+	params:
+		db_path = config['db_path'],
 	shell:
 		"""
-		#db_path="$(echo "$(which virsorter)" | rev |  cut -c 10- | rev )database"
 		if [ ! -d {params.db_path}/virsorter ];
 			mkdir -p {params.db_path}/virsorter
-			then virsorter setup -d "$db_path"/virsorter -j 4; 
+			then virsorter setup -d {params.db_path}/virsorter -j 4; 
 			else :;
 		fi
 
-		touch {output.flag}
+		touch {output}
 		"""
 
-#rule make_config:
-#    input:
-#        workflow_mode, # Intermediate input files (may be determined by workflow mode)
-#    output:
-#        csv = join(dirs.OUT, 'final_reports', 'samples.csv'),
-#        txt = join(dirs.OUT, 'final_reports', 'report.txt'),
-#    run:
-#        # Collate workflow outputs and i) summarize them in a new samples.csv for downstream analysis and/or ii) copy them to 'final_reports' for external data analysis
-#        copy(str(input[0]), str(output.txt))
-#        dct = {}
-#        for i in params.samples:
-#            s = i.split('/')[-1]
-#            if s not in dct: dct[s] = {}
-#            dct[str(input[1][s])]['illumina_fwd'] = s
-#        df = pd.DataFrame.from_dict(dct, orient ='index')
-#        df.reset_index(inplace = True)
-#        df.rename(columns = {'index': 'sample_name'}, inplace = True)
-#        df.to_csv(str(output.csv), index = False)
 
-
-
-
+rule checkv_db_setup:
+	output:
+		join(dirs_ext,'checkv.db_setup'),
+	conda:
+		join(config['env_yamls'], 'checkv.yaml'),
+	threads: config['installation_threads'],
+	params:
+		db_path = config['db_path'],
+	shell:
+		"""
+		if [ ! -f {params.db_path}/checkv-db/hmm_db/checkv_hmms.tsv ]; then 
+			cd {params.db_path}
+			checkv download_database {params.db_path}
+			else :; 
+		fi
+		touch {output}
+		"""

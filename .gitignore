@@ -125,3 +125,5 @@ dmypy.json
 
 # Random 
 *.DS_Store
+
+.idea/

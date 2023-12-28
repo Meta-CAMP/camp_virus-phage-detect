@@ -120,7 +120,7 @@ def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock,
                cores, env_dir, join(main_dir, 'configs', 'sbatch'))
     elif dry_run:
         # Set up the directory structure skeleton
-        Workflow_Dirs(work_dir, 'virus-phage-detect')
+        Workflow_Dirs(work_dir, 'viral_investigation')
         # Print the dry run standard out
         f = io.StringIO()
         with redirect_stdout(f):

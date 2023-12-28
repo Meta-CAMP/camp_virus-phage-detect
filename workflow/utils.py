@@ -24,22 +24,10 @@ def ingest_samples(samples, tmp):
     df = pd.read_csv(samples, header = 0, index_col = 0) # name, ctgs, fwd, rev
     s = list(df.index)
     lst = df.values.tolist()
-    #for i,l in enumerate(lst):
-    #    print ("this is a line")
-    #    print (abspath(l[0]))
-    #    #print (abspath(l[1]))
-    #    print ("end of test")
-    #   # Symlink your original data to the temporary directory
-    #    # if not exists(join(tmp, s[i] + '.fasta')):
-    #    #symlink(abspath(l[0]), join(tmp, s[i] + '.fasta'))
-    #    extract_from_gzip(abspath(l[0]), join(tmp, s[i] + '_1.fastq'))
-    #    extract_from_gzip(abspath(l[1]), join(tmp, s[i] + '_2.fastq'))
-    #return s
     for i,l in enumerate(lst):
         if not exists(join(tmp, s[i] + '_1.fastq.gz')):
             symlink(abspath(l[0]), join(tmp, s[i] + '_1.fastq.gz'))
             symlink(abspath(l[1]), join(tmp, s[i] + '_2.fastq.gz'))
-
     return s
 
 
@@ -55,19 +43,20 @@ class Workflow_Dirs:
     LOG = ''
 
     def __init__(self, work_dir, module):
-        self.OUT = join(work_dir, 'virus-phage-detect')
+        self.OUT = join(work_dir, 'viral_investigation')
         self.TMP = join(work_dir, 'tmp') 
         self.LOG = join(work_dir, 'logs') 
         # Add custom subdirectories to organize intermediate files
         check_make(self.OUT)
-        out_dirs = ['final_reports']
+        out_dirs = ['0_metaspades', '1.1_viralverify', '1.2_vibrant', '1.3_virsorter', '1.4_virfinder', '2_dereplication', \
+                    '3_checkv', 'final_reports']
         for d in out_dirs: 
             check_make(join(self.OUT, d))
         # Add a subdirectory for symlinked-in input files
         check_make(self.TMP)
         # Add custom subdirectories to organize rule logs
         check_make(self.LOG)
-        log_dirs = []
+        log_dirs = ['metaspades', 'viralverify', 'vibrant', 'checkv']
         for d in log_dirs: 
             check_make(join(self.LOG, d))
 

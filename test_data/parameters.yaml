@@ -3,17 +3,11 @@
 
 # --- general --- #
 
-databases_path: '/storage-local/databases'
-databases_path_new_way: '/storage-local/databases_new_way'
-some_constant:   2500
+ext: '/home/lam4003/bin/camp_virus-phage-detect/workflow/ext'
+db_path: '/workdir/lam4003/Databases'
 
 
-# assembly option
+# --- metaspades --- #
+
 option: 'meta'
 
-
-
-# --- first_rule --- #
-#host_reference_database: '/storage/tools/camp_short-read-quality-control/Databases/GRCh38_28122022/GCA_000001405.15_GRCh38_genomic'
-vibrant_database: '/storage-local/test/databases/'
-other_constant:    10000
