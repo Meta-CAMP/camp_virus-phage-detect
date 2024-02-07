@@ -1,4 +1,4 @@
-'''CLI for the CAMP viral_investigation module.'''
+'''CLI for the CAMP virus-phage-detect module.'''
 
 
 import click
