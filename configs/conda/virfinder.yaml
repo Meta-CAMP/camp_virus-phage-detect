@@ -1,8 +1,7 @@
 name: virfinder
 channels:
-  - conda-forge
   - bioconda
-  - defaults
+  - conda-forge
 dependencies:
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=2_gnu
@@ -180,4 +179,3 @@ dependencies:
   - zlib=1.2.13=h166bdaf_4
   - zstandard=0.19.0=py311hbe0fcd7_1
   - zstd=1.5.2=h3eb15da_6
-prefix: /storage/tools/anaconda3/envs/virfinder_env
