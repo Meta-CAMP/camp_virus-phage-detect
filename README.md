@@ -1,6 +1,6 @@
 # Virus-Phage Detection
 
-[![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() ![Version](https://img.shields.io/badge/version-0.2.0-brightgreen)
+[![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() ![Version](https://img.shields.io/badge/version-0.2.1-brightgreen)
 
 <!-- [![Documentation Status](https://img.shields.io/readthedocs/camp_virus-phage-detect)](https://camp-documentation.readthedocs.io/en/latest/virus-phage-detect.html) -->
 
@@ -16,14 +16,22 @@ The processed sequencing reads are assembled with MetaSPAdes, and viral contigs 
 
 3. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/virus-phage-detect.yaml`. 
 
+If you don't already have `conda` handy, we recommend installing `miniforge`, which is a minimal conda installer that, by default, installs packages from open-source community-driven channels such as `conda-forge`.
+```Bash
+# If you don't already have conda on your system...
+# wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+
+# Create and activate conda environment 
+cd camp_virus-phage-detect
+conda env create -f configs/conda/virus-phage-detect.yaml
+conda activate virus-phage-detect
+```
+
 4. Update the relevant parameters (if applicable- for example, location of external non-conda tools) in `test_data/parameters.yaml`.
 
 5. Make sure the installed pipeline works correctly. 
 ```Bash
 # Create and activate conda environment 
-cd camp_virus-phage-detect
-conda env create -f configs/conda/virus-phage-detect.yaml
-conda activate camp_virus-phage-detect
 # Run tests on the included sample dataset
 python /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py test
 ```
