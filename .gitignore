@@ -126,4 +126,14 @@ dmypy.json
 # Random 
 *.DS_Store
 
+# From testing
 .idea/
+.snakemake/
+conda_envs/
+test_out/
+test.out
+workflow/__pycache__/
+workflow/ext/checkv.db_setup
+workflow/ext/virsorter.db_setup
+.gitignore
+workflow/ext/vibrant.db_setup
