@@ -1,5 +1,5 @@
-"""Top-level package for the CAMP viral_investigation module."""
+"""Top-level package for the CAMP Virus-Phage Detection module."""
 
 __author__ = Rodolfo Brizola Toscan
 __email__ = rbtoscan@gmail.com
-__version__ = 0.2.2
+__version__ = 0.3.0

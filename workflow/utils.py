@@ -10,6 +10,13 @@ from os import makedirs, symlink
 from os.path import abspath, basename, exists, join
 import pandas as pd
 import shutil
+import yaml
+
+def get_conda_prefix(yaml_file):
+    """Load conda_prefix from parameters.yaml."""
+    with open(yaml_file, "r") as file:
+        config = yaml.safe_load(file)
+    return config.get("conda_prefix", "Not Found")  # Default value if key is missing
 
 
 def extract_from_gzip(ap, out):
@@ -43,13 +50,13 @@ class Workflow_Dirs:
     LOG = ''
 
     def __init__(self, work_dir, module):
-        self.OUT = join(work_dir, 'viral_investigation')
+        self.OUT = join(work_dir, 'virus_phage_detect')
         self.TMP = join(work_dir, 'tmp') 
         self.LOG = join(work_dir, 'logs') 
         # Add custom subdirectories to organize intermediate files
         check_make(self.OUT)
-        out_dirs = ['0_metaspades', '1.1_viralverify', '1.2_vibrant', '1.3_virsorter', '1.4_virfinder', '2_dereplication', \
-                    '3_checkv', 'final_reports']
+        out_dirs = ['0_metaspades', '1.1_viralverify', '1.2_vibrant', '1.3_virsorter', '1.4_virfinder', '1.5_genomad', \
+                    '2_dereplication', '3_checkv', 'final_reports']
         for d in out_dirs: 
             check_make(join(self.OUT, d))
         # Add a subdirectory for symlinked-in input files

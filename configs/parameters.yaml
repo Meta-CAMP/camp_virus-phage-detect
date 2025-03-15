@@ -4,10 +4,24 @@
 # --- general --- #
 
 ext: ''
-db_path: ''
+conda_prefix:   ''
 
 
-# --- metaspades --- #
+# --- vibrant --- #
 
-option: 'meta'
+vibrant_db: ''
 
+
+# --- virsorter2 --- #
+
+virsorter2_db: ''
+
+
+# --- genomad --- #
+
+genomad_db: ''
+
+
+# --- checkv --- #
+
+checkv_db: ''

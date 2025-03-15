@@ -1,4 +1,4 @@
-name: virus-phage-detect
+name: virus_phage_detect
 channels:
   - bioconda
   - conda-forge

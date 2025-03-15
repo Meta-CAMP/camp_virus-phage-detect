@@ -1,6 +1,6 @@
 # Virus-Phage Detection
 
-[![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() ![Version](https://img.shields.io/badge/version-0.2.2-brightgreen)
+[![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() ![Version](https://img.shields.io/badge/version-0.3.0-brightgreen)
 
 <!-- [![Documentation Status](https://img.shields.io/readthedocs/camp_virus-phage-detect)](https://camp-documentation.readthedocs.io/en/latest/virus-phage-detect.html) -->
 
@@ -8,30 +8,55 @@
 
 This module is designed to function as both a standalone viral investigation pipeline as well as a component of the larger CAMP metagenomics analysis pipeline. As such, it is both self-contained (ex. instructions included for the setup of a versioned environment, etc.), and seamlessly compatible with other CAMP modules (ex. ingests and spawns standardized input/output config files, etc.). 
 
-The processed sequencing reads are assembled with MetaSPAdes, and viral contigs are subsequently identified using the output assembly graph and ViralVerify. Contigs containing putative viral genetic material are also identified using VIBRANT, VirSorter, and VirFinder. The aggregated lists of contigs from the three inference algorithms is dereplicated using VirClust and merged with the ViralVerify list, and the overall quality of the putative viruses is assessed using CheckV. 
+The processed sequencing reads are assembled with MetaSPAdes, and viral contigs are subsequently identified using the output assembly graph and ViralVerify. Contigs containing putative viral genetic material are also identified using VIBRANT, VirSorter2, DeepVirFinder, and geNomad. The aggregated lists of contigs from the three inference algorithms is dereplicated using VirClust and merged with the ViralVerify list, and the overall quality of the putative viruses is assessed using CheckV. 
 
 ## Installation
 
-1. Clone repo from [Github](<https://github.com/MetaSUB-CAMP/camp_virus-phage-detect>).
+> [!TIP]
+> All databases used in CAMP modules will also be available for download on Zenodo (link TBD).
 
-3. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/virus-phage-detect.yaml`. 
+### Install `conda`
 
 If you don't already have `conda` handy, we recommend installing `miniforge`, which is a minimal conda installer that, by default, installs packages from open-source community-driven channels such as `conda-forge`.
 ```Bash
 # If you don't already have conda on your system...
-# wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
-
-# Create and activate conda environment 
-cd camp_virus-phage-detect
-conda env create -f configs/conda/virus-phage-detect.yaml
-conda activate virus-phage-detect
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 ```
 
-4. Update the relevant parameters (if applicable- for example, location of external non-conda tools) in `test_data/parameters.yaml`.
+Run the following command to initialize Conda for your shell. This will configure your shell to recognize conda activate. 
+```Bash
+conda init
+```
 
-5. Make sure the installed pipeline works correctly. 
+Restart your terminal or run:
+```Bash
+source ~/.bashrc  # For bash users
+source ~/.zshrc   # For zsh users
+```
+
+### Setting up the Virus-Phage Detection Module
+
+1. Clone repo from [Github](<https://github.com/Meta-CAMP/camp_virus-phage-detect>).
+
+2. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/virus-phage-detect.yaml`. 
 ```Bash
 # Create and activate conda environment 
+cd camp_virus-phage-detect
+conda env create -f configs/conda/virus_phage_detect.yaml
+conda activate virus_phage_detect
+```
+
+3. Set up the rest of the module interactively by running `setup.sh`. This step downloads the databases (VirFinder, VirSorter2, geNomad, and CheckV) and installs the other conda environments needed for running the module. This is done interactively by running `setup.sh`. `setup.sh` also generates `parameters.yaml` based on user input paths for running this module.
+```Bash
+source setup.sh
+
+# If you encounter issues where conda activate is not recognized, follow these steps to properly initialize Conda
+conda init
+source ~/.bashrc # or source ~/.zshrc
+```
+
+4. Make sure the installed pipeline works correctly. 
+```Bash
 # Run tests on the included sample dataset
 python /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py test
 ```

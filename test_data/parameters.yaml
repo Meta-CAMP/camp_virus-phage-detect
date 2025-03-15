@@ -3,11 +3,25 @@
 
 # --- general --- #
 
-ext: '/home/lam4003/bin/camp_virus-phage-detect/workflow/ext'
-db_path: '/workdir/lam4003/Databases'
+ext: ''
+conda_prefix:   ''
 
 
-# --- metaspades --- #
+# --- vibrant --- #
 
-option: 'meta'
+vibrant_db: ''
 
+
+# --- virsorter2 --- #
+
+virsorter2_db: ''
+
+
+# --- genomad --- #
+
+genomad_db: ''
+
+
+# --- checkv --- #
+
+checkv_db: ''
