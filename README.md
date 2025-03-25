@@ -1,6 +1,6 @@
 # Virus-Phage Detection
 
-[![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() ![Version](https://img.shields.io/badge/version-0.3.0-brightgreen)
+[![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() ![Version](https://img.shields.io/badge/version-0.3.1-brightgreen)
 
 <!-- [![Documentation Status](https://img.shields.io/readthedocs/camp_virus-phage-detect)](https://camp-documentation.readthedocs.io/en/latest/virus-phage-detect.html) -->
 
@@ -37,6 +37,9 @@ source ~/.zshrc   # For zsh users
 ### Setting up the Virus-Phage Detection Module
 
 1. Clone repo from [Github](<https://github.com/Meta-CAMP/camp_virus-phage-detect>).
+```Bash
+git clone https://github.com/Meta-CAMP/camp_virus-phage-detect.git
+```
 
 2. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/virus-phage-detect.yaml`. 
 ```Bash
