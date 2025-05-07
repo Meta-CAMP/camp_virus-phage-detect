@@ -45,7 +45,7 @@ rule metaspades_assembly:
     log:
         join(dirs.LOG, 'metaspades', '{sample}.out'),
     conda:
-        'assemblers',
+        'spades',
     threads:
         config['assembly_threads'],
     resources:
@@ -77,7 +77,7 @@ rule viralverify:
 	log:
 		join(dirs.LOG, 'viralverify', '{sample}.out'),
 	conda:
-		'assemblers',
+		'spades',
 	threads:
 		config['assembly_threads'],
 	resources:
@@ -133,7 +133,7 @@ rule virsorter:
 	log:
 		join(dirs.LOG, 'virsorter', '{sample}.out'),
 	conda:
-		join(config['env_yamls'], 'virsorter2.yaml'),
+		'virsorter2',
 	threads: config['virsorter_threads'],
 	params: 
 		virsorter2_db = config['virsorter2_db'],

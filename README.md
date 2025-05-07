@@ -41,16 +41,9 @@ source ~/.zshrc   # For zsh users
 git clone https://github.com/Meta-CAMP/camp_virus-phage-detect.git
 ```
 
-2. Set up the conda environment (contains Snakemake, Click, and other essentials) using `configs/conda/virus-phage-detect.yaml`. 
+2. Set up the rest of the module interactively by running `setup.sh`. This step downloads the databases (VirFinder, VirSorter2, geNomad, and CheckV) and installs the other conda environments needed for running the module. This is done interactively by running `setup.sh`. `setup.sh` also generates `parameters.yaml` based on user input paths for running this module.
 ```Bash
-# Create and activate conda environment 
-cd camp_virus-phage-detect
-conda env create -f configs/conda/virus_phage_detect.yaml
-conda activate virus_phage_detect
-```
-
-3. Set up the rest of the module interactively by running `setup.sh`. This step downloads the databases (VirFinder, VirSorter2, geNomad, and CheckV) and installs the other conda environments needed for running the module. This is done interactively by running `setup.sh`. `setup.sh` also generates `parameters.yaml` based on user input paths for running this module.
-```Bash
+cd cd camp_virus-phage-detect/
 source setup.sh
 
 # If you encounter issues where conda activate is not recognized, follow these steps to properly initialize Conda
@@ -61,6 +54,7 @@ source ~/.bashrc # or source ~/.zshrc
 4. Make sure the installed pipeline works correctly. 
 ```Bash
 # Run tests on the included sample dataset
+conda activate camp
 python /path/to/camp_virus-phage-detect/workflow/virus-phage-detect.py test
 ```
 
@@ -104,6 +98,7 @@ To run CAMP on the command line, use the following, where `/path/to/work/dir` is
     - Relative or absolute paths to the Snakefile and/or the working directory (if you're running elsewhere) are accepted!
     - The parameters and resource config YAMLs can also be customized.
 ```Bash
+conda activate camp
 python /path/to/camp_virus-phage-detect/workflow/mag_qc.py \
     (-c number_of_cores_allocated) \
     (-p /path/to/parameters.yaml) \
@@ -125,6 +120,7 @@ To run CAMP on a job submission cluster (for now, only Slurm is supported), use 
     - `--slurm` is an optional flag that submits all rules in the Snakemake pipeline as `sbatch` jobs. 
     - In Slurm mode, the `-c` flag refers to the maximum number of `sbatch` jobs submitted in parallel, **not** the pool of cores available to run the jobs. Each job will request the number of cores specified by threads in `configs/resources/slurm.yaml`.
 ```Bash
+conda activate camp
 sbatch -J jobname -o jobname.log << "EOF"
 #!/bin/bash
 python /path/to/camp_virus-phage-detect/workflow/mag_qc.py --slurm \
