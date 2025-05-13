@@ -65,7 +65,7 @@ find_install_camp_env() {
         echo "✅ The main CAMP environment is already installed in $DEFAULT_CONDA_ENV_DIR."
     else
         echo "🚀 Installing the main CAMP environment in $DEFAULT_CONDA_ENV_DIR/..."
-        conda create --prefix "$DEFAULT_CONDA_ENV_DIR/camp" -c conda-forge -c bioconda biopython blast bowtie2 bumpversion click click-default-group cookiecutter jupyter matplotlib numpy pandas samtools scikit-learn scipy seaborn snakemake umap-learn upsetplot
+        conda create --prefix "$DEFAULT_CONDA_ENV_DIR/camp" -c conda-forge -c bioconda biopython blast bowtie2 bumpversion click click-default-group cookiecutter jupyter matplotlib numpy pandas samtools scikit-learn scipy seaborn snakemake=7.32.4 umap-learn upsetplot
         echo "✅ The main CAMP environment has been installed successfully!"
     fi
 }
@@ -76,9 +76,56 @@ find_install_conda_env() {
         echo "✅ The $1 environment is already installed in $DEFAULT_CONDA_ENV_DIR."
     else
         echo "🚀 Installing $1 in $DEFAULT_CONDA_ENV_DIR/$1..."
-        conda create --prefix $DEFAULT_CONDA_ENV_DIR/$1 -c conda-forge -c bioconda $1
+        if [ $1 = 'virsorter' ]; then
+            conda create -n virsorter -c conda-forge -c bioconda virsorter=2.2.3 
+        else
+            conda create --prefix $DEFAULT_CONDA_ENV_DIR/$1 -c conda-forge -c bioconda $1
+        fi
         echo "✅ $1 installed successfully!"
     fi
+}
+
+# Ask user if each database is already installed or needs to be installed
+ask_database() {
+    local DB_NAME="$1"
+    local DB_VAR_NAME="$2"
+    local DB_HINT="$3"
+    local DB_PATH=""
+
+    echo "🛠️  Checking for $DB_NAME database..."
+
+    while true; do
+        read -p "❓ Do you already have the $DB_NAME database installed? (y/n): " RESPONSE
+        case "$RESPONSE" in
+            [Yy]* )
+                while true; do
+                    read -p "📂 Enter the path to your existing $DB_NAME database (eg. $DB_HINT): " DB_PATH
+                    if [[ -d "$DB_PATH" || -f "$DB_PATH" ]]; then
+                        DATABASE_PATHS[$DB_VAR_NAME]="$DB_PATH"
+                        echo "✅ $DB_NAME path set to: $DB_PATH"
+                        return  # Exit the function immediately after successful input
+                    else
+                        echo "⚠️ The provided path does not exist or is empty. Please check and try again."
+                        read -p "Do you want to re-enter the path (r) or install $DB_NAME instead (i)? (r/i): " RETRY
+                        if [[ "$RETRY" == "i" ]]; then
+                            break  # Exit inner loop to start installation
+                        fi
+                    fi
+                done
+                        if [[ "$RETRY" == "i" ]]; then
+                            break  # Exit outer loop to start installation
+                        fi
+                    fi
+                done
+                ;;
+            [Nn]* )
+                break # Exit outer loop to start installation
+                ;; 
+            * ) echo "⚠️ Please enter 'y(es)' or 'n(o)'.";;
+        esac
+    done
+    read -p "📂 Enter the directory where you want to install $DB_NAME: " DB_PATH
+    install_database "$DB_NAME" "$DB_VAR_NAME" "$DB_PATH"
 }
 
 # Install databases in the specified directory
@@ -148,7 +195,7 @@ DEFAULT_CONDA_ENV_DIR=$(conda info --base)/envs
 find_install_camp_env
 
 # ...auxiliary environments
-MODULE_PKGS=('spades' 'vibrant' 'virsorter2' 'genomad' 'checkv ') # Add any additional conda packages here
+MODULE_PKGS=('spades' 'vibrant' 'virsorter' 'genomad' 'checkv ') # Add any additional conda packages here
 for m in "${MODULE_PKGS[@]}"; do
     find_install_conda_env "$m"
 done
@@ -270,5 +317,5 @@ EOL
 
 echo "✅ Test data input CSV created at: $INPUT_CSV"
 
-echo "🎯 Setup complete! You can now test the workflow using `python $MODULE_WORK_DIR/workflow/virus_phage_detect.py test`"
+echo "🎯 Setup complete! You can now test the workflow using \`python $MODULE_WORK_DIR/workflow/virus_phage_detect.py test\`"
 

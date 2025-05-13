@@ -1,8 +1,9 @@
 # Virus-Phage Detection
 
-[![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() ![Version](https://img.shields.io/badge/version-0.4.1-brightgreen)
+![Version](https://img.shields.io/badge/version-0.5.0-brightgreen)
 
 <!-- [![Documentation Status](https://img.shields.io/readthedocs/camp_virus-phage-detect)](https://camp-documentation.readthedocs.io/en/latest/virus-phage-detect.html) -->
+<!-- [![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() -->
 
 ## Overview
 

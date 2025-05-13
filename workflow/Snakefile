@@ -133,7 +133,7 @@ rule virsorter:
 	log:
 		join(dirs.LOG, 'virsorter', '{sample}.out'),
 	conda:
-		'virsorter2',
+		'virsorter',
 	threads: config['virsorter_threads'],
 	params: 
 		virsorter2_db = config['virsorter2_db'],
