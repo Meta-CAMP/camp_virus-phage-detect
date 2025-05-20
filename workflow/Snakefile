@@ -24,12 +24,6 @@ dirs_scr = join(dirs_ext, 'scripts')
 
 # --- Workflow output --- #
 
-if config['option'] != '':
-    option = '--' + config['option'],
-else:
-    option = ''
-
-
 rule all:
 	input:
 		expand(join(dirs.OUT, 'final_reports','{sample}_quality_summary.tsv'), sample=SAMPLES)
@@ -52,7 +46,6 @@ rule metaspades_assembly:
         mem_mb = config['assembly_mem_mb'],
     params:
         out_dir = join(dirs.OUT,'0_metaspades','{sample}'),
-        option = option,
     shell:
         """
         if [ -f "{params.out_dir}/K33/assembly_graph.fastg" ]; then
@@ -84,7 +77,6 @@ rule viralverify:
 		mem_mb = config['assembly_mem_mb'],
 	params:
 		out_dir = join(dirs.OUT,'1.1_viralverify','{sample}'),
-		option = option,
 	shell:
 		"""
 		spades.py --metaviral --only-assembler -t {threads} -m {resources.mem_mb} -1 {input.fwd} -2 {input.rev} \
@@ -141,7 +133,7 @@ rule virsorter:
 		min_len = config['min_ctg_len'],
 	shell:
 		"""
-		virsorter run -w {params.out_dir} -d {params.virsorter2_db} -i {input} --min-length {params.min_len} -j {threads} > {log} 2>&1
+		virsorter run -w {params.out_dir} -d {params.virsorter2_db} -i {input} --min-length {params.min_len} -j {threads} --use-conda-off > {log} 2>&1
 		cat {params.out_dir}/final-viral-combined.fa | grep ">" | sed "s/_fragment_1//g;s/>//g" | cut -f1 -d "|" > {output}
 		"""
 
@@ -162,9 +154,10 @@ rule deepvirfinder:
 	params:
 		parse_scr = join(dirs_scr, 'virfinder_results_parse.sh'),
 		out_dir = join(dirs.OUT, '1.4_virfinder','{sample}'),
+		dirs_ext = dirs_ext,
 	shell:
 		"""
-		python dvf.py -i {input} -o {params.out_dir} -l 1000 -c {threads}
+		python {params.dirs_ext}/DeepVirFinder/dvf.py -i {input} -o {params.out_dir} -l 1000 -c {threads}
 		bash {params.parse_scr} {params.out_dir}/scaffolds_gt1000bp_dvfpred.txt {output}
 		"""
 
@@ -197,7 +190,7 @@ rule concat_inferences:
 		fa_vibrant = 	  join(dirs.OUT,'1.2_vibrant'    ,'{sample}','vibrant_detected_viruses.txt'),
 		fa_virsorter = 	  join(dirs.OUT,'1.3_virsorter',  '{sample}','virsorter_detected_viruses.txt'),
 		fa_virfinder = 	  join(dirs.OUT,'1.4_virfinder',  '{sample}','virfinder_detected_viruses.txt'),
-		fa_virfinder = 	  join(dirs.OUT,'1.5_genomad',  '{sample}','genomad_detected_viruses.txt'),
+		fa_genomad = 	  join(dirs.OUT,'1.5_genomad',  '{sample}','genomad_detected_viruses.txt'),
 	output:
 		join(dirs.OUT,'2_dereplication','{sample}','contigs_derep.fa'),
 	params:
@@ -207,7 +200,7 @@ rule concat_inferences:
 		processing_scr  = join(dirs_scr, 'faSomeRecords.py'),
 	shell:
 		"""
-		cat {input.fa_vibrant} {input.fa_virsorter} {input.fa_virfinder} | sort | uniq > {params.out_ids} 
+		cat {input.fa_vibrant} {input.fa_virsorter} {input.fa_virfinder} {input.fa_genomad} | sort | uniq > {params.out_ids} 
 		python {params.processing_scr} -f {input.fa_assembly} -l {params.out_ids} --outfile {params.merged_fa}
 		cat {input.fa_viralverify} {params.merged_fa} > {output}
 		"""

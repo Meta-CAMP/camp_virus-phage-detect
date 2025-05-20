@@ -1,0 +1,3 @@
+sample_name,illumina_fwd,illumina_rev
+commA,/path/to/camp_virus-phage-detect/test_data/commA_1.fastq.gz,/path/to/camp_virus-phage-detect/test_data/commA_2.fastq.gz
+

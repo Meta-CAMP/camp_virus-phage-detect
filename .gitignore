@@ -137,3 +137,5 @@ workflow/ext/checkv.db_setup
 workflow/ext/virsorter.db_setup
 .gitignore
 workflow/ext/vibrant.db_setup
+virus-phage-detect.out
+virsorter/

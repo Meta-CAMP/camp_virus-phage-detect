@@ -77,7 +77,12 @@ find_install_conda_env() {
     else
         echo "🚀 Installing $1 in $DEFAULT_CONDA_ENV_DIR/$1..."
         if [ $1 = 'virsorter' ]; then
-            conda create -n virsorter -c conda-forge -c bioconda virsorter=2.2.3 
+            conda create --prefix $DEFAULT_CONDA_ENV_DIR/virsorter -c conda-forge -c bioconda virsorter=2.2.3 last ncbi-genome-download prodigal=2.6 python=3.8 screed=1 hmmer!=3.3.1 scikit-learn=0.22.1 imbalanced-learn pandas=1.2 seaborn
+        elif [ $1 = 'deepvirfinder' ]; then
+            conda create --prefix $DEFAULT_CONDA_ENV_DIR/deepvirfinder python=3.6 numpy theano=1.0.3 keras=2.2.4 scikit-learn Biopython h5py=2.10.0
+            cd $MODULE_WORK_DIR/workflow/ext/
+            git clone https://github.com/jessieren/DeepVirFinder
+            cd $MODULE_WORK_DIR
         else
             conda create --prefix $DEFAULT_CONDA_ENV_DIR/$1 -c conda-forge -c bioconda $1
         fi
@@ -108,11 +113,6 @@ ask_database() {
                         echo "⚠️ The provided path does not exist or is empty. Please check and try again."
                         read -p "Do you want to re-enter the path (r) or install $DB_NAME instead (i)? (r/i): " RETRY
                         if [[ "$RETRY" == "i" ]]; then
-                            break  # Exit inner loop to start installation
-                        fi
-                    fi
-                done
-                        if [[ "$RETRY" == "i" ]]; then
                             break  # Exit outer loop to start installation
                         fi
                     fi
@@ -124,7 +124,7 @@ ask_database() {
             * ) echo "⚠️ Please enter 'y(es)' or 'n(o)'.";;
         esac
     done
-    read -p "📂 Enter the directory where you want to install $DB_NAME: " DB_PATH
+    read -p "📂 Enter the directory where you want to install the $DB_NAME database: " DB_PATH
     install_database "$DB_NAME" "$DB_VAR_NAME" "$DB_PATH"
 }
 
@@ -140,29 +140,31 @@ install_database() {
     case "$DB_VAR_NAME" in
         "VIBRANT_PATH")
             conda activate vibrant
-            mkdir -p $FINAL_DB_PATH
-            cd $FINAL_DB_PATH
-            python VIBRANT_setup.py # TODO might need conda?
+            download-db.sh $INSTALL_DIR
+            mv $INSTALL_DIR/databases $FINAL_DB_PATH
             echo "✅ VIBRANT databases installed successfully!"
+            conda deactivate
             ;;
         "VIRSORTER2_PATH")
-            conda activate virsorter2
-            mkdir -p $FINAL_DB_PATH
-            virsorter setup -d $FINAL_DB_PATH -j 10
+            conda activate virsorter
+            cd $INSTALL_DIR
+            wget https://osf.io/v46sc/download
+            tar -xzf $INSTALL_DIR/download
+            mv $INSTALL_DIR/db $FINAL_DB_PATH
+            rm $INSTALL_DIR/download
+            virsorter config --init-source --db-dir=$FINAL_DB_PATH
             echo "✅ VirSorter2 database installed successfully!"
             conda deactivate
             ;;
          "GENOMAD_PATH")
             conda activate genomad
-            mkdir -p $FINAL_DB_PATH
-            genomad download-database $FINAL_DB_PATH
+            genomad download-database $INSTALL_DIR
             echo "✅ VirSorter2 database installed successfully!"
             conda deactivate
             ;;
           "CHECKV_PATH")
             conda activate checkv
-            cd $INSTALL_DIR
-            checkv download database $FINAL_DB_PATH
+            checkv download_database $INSTALL_DIR
             echo "✅ CheckV database installed successfully!"
             conda deactivate
             ;;       
@@ -195,7 +197,7 @@ DEFAULT_CONDA_ENV_DIR=$(conda info --base)/envs
 find_install_camp_env
 
 # ...auxiliary environments
-MODULE_PKGS=('spades' 'vibrant' 'virsorter' 'genomad' 'checkv ') # Add any additional conda packages here
+MODULE_PKGS=('spades' 'vibrant' 'virsorter' 'genomad' 'checkv') # Add any additional conda packages here
 for m in "${MODULE_PKGS[@]}"; do
     find_install_conda_env "$m"
 done
@@ -204,7 +206,7 @@ done
 
 # Default database locations relative to $INSTALL_DIR
 declare -A DB_SUBDIRS=(
-    ["VIBRANT_PATH"]="VIBRANT_dbs"
+    ["VIBRANT_PATH"]="VIBRANT_db"
     ["VIRSORTER2_PATH"]="virsorter2_db"
     ["GENOMAD_PATH"]="genomad_db"
     ["CHECKV_PATH"]="checkv-db-v1.5"

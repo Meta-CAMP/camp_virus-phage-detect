@@ -21,6 +21,11 @@ virsorter_threads: 10
 min_ctg_len: 1500
 
 
+# --- genomad --- #
+
+genomad_threads: 10
+
+
 # --- checkv --- #
 
 checkv_threads: 10

@@ -1,13 +1,13 @@
 # Virus-Phage Detection
 
-![Version](https://img.shields.io/badge/version-0.5.0-brightgreen)
+![Version](https://img.shields.io/badge/version-0.6.0-brightgreen)
 
 <!-- [![Documentation Status](https://img.shields.io/readthedocs/camp_virus-phage-detect)](https://camp-documentation.readthedocs.io/en/latest/virus-phage-detect.html) -->
 <!-- [![Documentation Status](https://img.shields.io/badge/docs-unknown-yellow.svg)]() -->
 
 ## Overview
 
-This module is designed to function as both a standalone viral investigation pipeline as well as a component of the larger CAMP metagenomics analysis pipeline. As such, it is both self-contained (ex. instructions included for the setup of a versioned environment, etc.), and seamlessly compatible with other CAMP modules (ex. ingests and spawns standardized input/output config files, etc.). 
+This module is designed to function as both a standalone virus and phage detection pipeline as well as a component of the larger CAMP metagenomics analysis pipeline. As such, it is both self-contained (ex. instructions included for the setup of a versioned environment, etc.), and seamlessly compatible with other CAMP modules (ex. ingests and spawns standardized input/output config files, etc.). 
 
 The processed sequencing reads are assembled with MetaSPAdes, and viral contigs are subsequently identified using the output assembly graph and ViralVerify. Contigs containing putative viral genetic material are also identified using VIBRANT, VirSorter2, DeepVirFinder, and geNomad. The aggregated lists of contigs from the three inference algorithms is dereplicated using VirClust and merged with the ViralVerify list, and the overall quality of the putative viruses is assessed using CheckV. 
 
@@ -52,7 +52,7 @@ conda init
 source ~/.bashrc # or source ~/.zshrc
 ```
 
-4. Make sure the installed pipeline works correctly. 
+4. Make sure the installed pipeline works correctly. With 10 CPUs and 40 GB of RAM allocated, the test dataset takes appoximately 14 minutes to complete.
 ```Bash
 # Run tests on the included sample dataset
 conda activate camp
