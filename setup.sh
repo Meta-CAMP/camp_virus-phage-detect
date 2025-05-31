@@ -77,7 +77,7 @@ find_install_conda_env() {
     else
         echo "🚀 Installing $1 in $DEFAULT_CONDA_ENV_DIR/$1..."
         if [ $1 = 'virsorter' ]; then
-            conda create --prefix $DEFAULT_CONDA_ENV_DIR/virsorter -c conda-forge -c bioconda virsorter=2.2.3 last ncbi-genome-download prodigal=2.6 python=3.8 screed=1 hmmer!=3.3.1 scikit-learn=0.22.1 imbalanced-learn pandas=1.2 seaborn
+            conda create --prefix $DEFAULT_CONDA_ENV_DIR/virsorter -c conda-forge -c bioconda virsorter=2.2.3 last ncbi-genome-download prodigal=2.6 python=3.8 screed=1 hmmer!=3.3.1 scikit-learn=0.22.1 imbalanced-learn pandas=1.2 seaborn numpy<1.24
         elif [ $1 = 'deepvirfinder' ]; then
             conda create --prefix $DEFAULT_CONDA_ENV_DIR/deepvirfinder python=3.6 numpy theano=1.0.3 keras=2.2.4 scikit-learn Biopython h5py=2.10.0
             cd $MODULE_WORK_DIR/workflow/ext/

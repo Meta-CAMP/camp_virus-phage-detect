@@ -158,7 +158,7 @@ rule deepvirfinder:
 	shell:
 		"""
 		python {params.dirs_ext}/DeepVirFinder/dvf.py -i {input} -o {params.out_dir} -l 1000 -c {threads}
-		bash {params.parse_scr} {params.out_dir}/scaffolds_gt1000bp_dvfpred.txt {output}
+		bash {params.parse_scr} {params.out_dir}/scaffolds.fasta_gt1000bp_dvfpred.txt {output}
 		"""
 
 
